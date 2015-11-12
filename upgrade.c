@@ -1,10 +1,12 @@
 #include <stdlib.h>
+#include <unistd.h>
 #include <stdio.h>
 #include "cJSON.h"
 #include "conf.h"
 
 #define LOCALCONFPATH "./upgrade.json"
 #define URLCONFPATH "./upgrade.json.download"
+#define PAGESIZE 512
 
 cJSON * loadconffile(char * path){ 
 	FILE *f;long len;char *data;
@@ -15,29 +17,46 @@ cJSON * loadconffile(char * path){
 	free(data); 
 	return json;
 }
+
 void copy(char * src, char * dst){
 	FILE *in_fd = fopen(src,"rb"); 
 	FILE *out_fd = fopen(dst,"w"); 
-	char buf[512];
-	int n = 0;
+	char buf[PAGESIZE];
+	size_t n = 0;
 
 	while (n != EOF) {
-		n = fread(buffer, 1, 512, in_fd);
+		n = fread(buf, 1, PAGESIZE, in_fd);
 		if (n == 0)
 			break;
-		fwrite(buffer, 1, n, out_fd);
+		fwrite(buf, 1, n, out_fd);
 	}
-
+	fclose(in_fd);
+	fclose(out_fd);
 }
 
 int main(){
-	cJSON * localjson = loadconffile(LOCALCONFPATH);
-	cJSON * urljson = loadconffile(URLCONFPATH);
-	struct conf * localconf = loadconf(localjson);
-	struct conf * urlconf = loadconf(urljson);
-	cJSON_Delete(localjson);
-	cJSON_Delete(urljson);
-	if (0 != compareconf(localconf, urlconf) ){
-		copy(URLCONFPATH, LOCALCONFPATH);
+	if(access(URLCONFPATH, F_OK) != -1){
+		remove(URLCONFPATH);
 	}
+	cJSON * localjson = loadconffile(LOCALCONFPATH);
+	struct conf * localconf = loadconf(localjson);
+	int rt  = system(localconf->upgradecmd);
+	if(rt == 0){
+		cJSON * urljson = loadconffile(URLCONFPATH);
+		struct conf * urlconf = loadconf(urljson);
+		cJSON_Delete(localjson);
+		cJSON_Delete(urljson);
+
+		if (0 != compareconf(localconf, urlconf) ){
+			copy(URLCONFPATH, LOCALCONFPATH);
+			remove(URLCONFPATH); 
+			system("./upgrade");
+			exit(1);
+		}else{
+			fprintf(stdout, "i am in 2\n");
+		}
+
+	}else{
+	}
+	system("ls");
 }

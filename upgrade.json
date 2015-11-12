@@ -1,0 +1,19 @@
+{
+	"upgradecmd":"wget http://xxx/upgrade.json -O ./upgrade.json.download",
+	"programs":[
+		{
+			"name":"abc",
+			"version":"1",
+			"downloadname":"abc"
+			"updatecmd":"wget http://xxx/cetcbox -O ./listen",
+			"runcmd":"1"
+		},
+		{
+			"name":"abc",
+			"version":"1",
+			"downloadname":"abc",
+			"updatecmd":"wget http://xxx/cetcbox -O ./main",
+			"runcmd":"1"
+		}
+	]
+}
