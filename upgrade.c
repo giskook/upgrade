@@ -61,10 +61,11 @@ int main(){
 		struct list_head * head = getconf(localconf, urlconf); 
 		if(head && !list_empty(head)){
 			downloadprogram(head);
-			copy(URLCONFPATH, LOCALCONFPATH);
-			remove(URLCONFPATH); 
 		}
 		free(head);
+		copy(URLCONFPATH, LOCALCONFPATH);
+		remove(URLCONFPATH); 
+
 		runprograms(urlconf);
 		destroyconf(urlconf);
 	}else{ 

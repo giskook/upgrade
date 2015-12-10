@@ -1,19 +1,17 @@
 {
-	"upgradecmd":"wget http://xxx/upgrade.json -O ./upgrade.json.download",
-	"programs":[
-		{
-			"name":"abc",
-			"version":"1",
-			"downloadname":"abc",
-			"updatecmd":"wget http://xxx/cetcbox -O ./listen",
-			"runcmd":"ls"
-		},
-		{
-			"name":"abc",
-			"version":"1",
-			"downloadname":"abc",
-			"updatecmd":"wget http://xxx/cetcbox -O ./main",
-			"runcmd":"ls"
-		}
-	]
+        "upgradecmd":"wget http://111.11.26.211:6500/upgrade.json -O ./upgrade.json.download",
+        "programs":[
+                {
+                        "name":"listen",
+                        "version":"1",
+                        "updatecmd":"wget http://xxx/listen -O ./listen.download",
+                        "runcmd":"ls"
+                },
+                {
+                        "name":"main",
+                        "version":"1",
+                        "updatecmd":"wget http://xxx/main -O ./main.download",
+                        "runcmd":"ls"
+                }
+        ]
 }
