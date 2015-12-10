@@ -1,13 +1,12 @@
-#include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "cJSON.h"
 #include "conf.h"
 #include "list.h"
 
 #define LOCALCONFPATH "./upgrade.json"
 #define URLCONFPATH "./upgrade.json.download"
-#define PAGESIZE 512
 
 cJSON * loadconffile(char * path){ 
 	FILE *f;long len;char *data;
@@ -17,22 +16,6 @@ cJSON * loadconffile(char * path){
 	json=cJSON_Parse(data);
 	free(data); 
 	return json;
-}
-
-void copy(char * src, char * dst){
-	FILE *in_fd = fopen(src,"rb"); 
-	FILE *out_fd = fopen(dst,"w"); 
-	char buf[PAGESIZE];
-	size_t n = 0;
-
-	while (n != EOF) {
-		n = fread(buf, 1, PAGESIZE, in_fd);
-		if (n == 0)
-			break;
-		fwrite(buf, 1, n, out_fd);
-	}
-	fclose(in_fd);
-	fclose(out_fd);
 }
 
 void execmajor(void){

@@ -20,3 +20,4 @@ struct list_head * getconf(struct conf * conflocal, struct conf * confurl);
 void destroyconf(struct conf * conf); 
 void downloadprogram(struct list_head * head);
 void runprograms(struct conf * urlconf);
+void copy(char * src, char * dst);

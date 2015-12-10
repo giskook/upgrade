@@ -1,5 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
+#include <errno.h>
 #include "cJSON.h"
 #include "conf.h"
 
@@ -10,6 +12,24 @@
 #define DOWNLOADNAME "downloadname"
 #define UPDATECMD "updatecmd"
 #define RUNCMD "runcmd"
+
+#define PAGESIZE 512
+
+void copy(char * src, char * dst){
+	FILE *in_fd = fopen(src,"rb"); 
+	FILE *out_fd = fopen(dst,"w"); 
+	char buf[PAGESIZE];
+	size_t n = 0;
+
+	while (n != EOF) {
+		n = fread(buf, 1, PAGESIZE, in_fd);
+		if (n == 0)
+			break;
+		fwrite(buf, 1, n, out_fd);
+	}
+	fclose(in_fd);
+	fclose(out_fd);
+}
 
 struct conf * loadconf(cJSON *json){
 	if(!json){
@@ -39,9 +59,9 @@ struct conf * loadconf(cJSON *json){
 			programs[i].version = atoi(version->valuestring);
 		}
 		downloadname = cJSON_GetObjectItem(subitem, DOWNLOADNAME);
-		if(downloadname && downloadname->type == cJSON_String){
+		if(version && version->type == cJSON_String){
 			programs[i].downloadname = strdup(downloadname->valuestring);
-		}
+		} 
 		updatecmd  = cJSON_GetObjectItem(subitem, UPDATECMD);
 		if(updatecmd && updatecmd->type == cJSON_String){
 			programs[i].updatecmd = strdup(updatecmd->valuestring);
@@ -100,7 +120,6 @@ struct list_head * getconf(struct conf * conflocal, struct conf * confurl){
 void destroyprogram( struct program * program ){
 	if(program){
 		free(program->name);
-		free(program->downloadname);
 		free(program->updatecmd);
 		free(program->runcmd);
 	}
@@ -124,7 +143,12 @@ void downloadprogram(struct list_head * head){
 	struct list_head * pos, *n;
 	list_for_each_safe(pos, n, head){ 
 		program = list_entry(pos, struct program, list); 
-		system(program->updatecmd);
+		remove(program->downloadname);
+		if (0 == system(program->updatecmd)){
+			copy(program->downloadname, program->name); 
+			int rt = remove(program->downloadname);
+			fprintf(stdout, "%d %s\n", rt, strerror(errno));
+		}
 	}
 }
 
