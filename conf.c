@@ -48,7 +48,7 @@ struct conf * loadconf(cJSON *json){
 		}
 		runcmd = cJSON_GetObjectItem(subitem, RUNCMD);
 		if(runcmd && runcmd->type == cJSON_String){
-			programs[i].runcmd = atoi(runcmd->valuestring);
+			programs[i].runcmd = strdup(runcmd->valuestring);
 		}
 	}
 
@@ -66,20 +66,43 @@ struct conf * loadconf(cJSON *json){
 	return conf;
 }
 
-
-int compareconf(struct conf * conflocal, struct conf * confurl){ 
-	if(conflocal == NULL || confurl == NULL){
-		return 1;
+int includeprogram(struct conf * conflocal, struct program * program){
+	int i ;
+	for(i = 0; i < conflocal->programcount; i++){
+		if(strlen(conflocal->programs[i].name) == strlen(program->name) && 
+		   0 == strcmp(conflocal->programs[i].name, program->name) &&
+		   conflocal->programs[i].version == program->version){
+			return 1;
+		}
 	}
 
 	return 0;
 }
 
+struct list_head * getconf(struct conf * conflocal, struct conf * confurl){ 
+	if(conflocal == NULL || confurl == NULL){
+		return NULL;
+	} 
+
+	struct list_head * head = (struct list_head *)malloc(sizeof(struct list_head));
+	INIT_LIST_HEAD(head);
+
+	int i;
+	for(i = 0; i < confurl->programcount; i++){
+		if(!includeprogram(conflocal, &confurl->programs[i])){ 
+			list_add_tail(&confurl->programs[i].list, head);
+		}
+	}
+
+	return head;
+}
+
 void destroyprogram( struct program * program ){
 	if(program){
-		free(program->srcurl);
-		free(program->dst);
-		free(program->parameters);
+		free(program->name);
+		free(program->downloadname);
+		free(program->updatecmd);
+		free(program->runcmd);
 	}
 }
 
@@ -93,4 +116,21 @@ void destroyconf(struct conf * conf){
 		free(conf->programs);
 	}
 	free(conf);
+}
+
+void downloadprogram(struct list_head * head){
+	struct program * program;
+
+	struct list_head * pos, *n;
+	list_for_each_safe(pos, n, head){ 
+		program = list_entry(pos, struct program, list); 
+		system(program->updatecmd);
+	}
+}
+
+void runprograms(struct conf * urlconf){
+	int i;
+	for(i = 0; i < urlconf->programcount; i++){ 
+		system(urlconf->programs[i].runcmd);
+	}
 }

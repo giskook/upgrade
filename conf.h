@@ -1,9 +1,12 @@
+#include "list.h"
+
 struct program{
 	char * name;
 	unsigned int version;
 	char * downloadname;
 	char * updatecmd;
 	char * runcmd;
+	struct list_head list;
 };
 
 struct conf{
@@ -13,5 +16,7 @@ struct conf{
 };
 
 struct conf * loadconf(cJSON *json);
-int compareconf(struct conf * conflocal, struct conf * confurl);
+struct list_head * getconf(struct conf * conflocal, struct conf * confurl);
 void destroyconf(struct conf * conf); 
+void downloadprogram(struct list_head * head);
+void runprograms(struct conf * urlconf);

@@ -4,16 +4,16 @@
 		{
 			"name":"abc",
 			"version":"1",
-			"downloadname":"abc"
+			"downloadname":"abc",
 			"updatecmd":"wget http://xxx/cetcbox -O ./listen",
-			"runcmd":"1"
+			"runcmd":"ls"
 		},
 		{
 			"name":"abc",
 			"version":"1",
 			"downloadname":"abc",
 			"updatecmd":"wget http://xxx/cetcbox -O ./main",
-			"runcmd":"1"
+			"runcmd":"ls"
 		}
 	]
 }

@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include "cJSON.h"
 #include "conf.h"
+#include "list.h"
 
 #define LOCALCONFPATH "./upgrade.json"
 #define URLCONFPATH "./upgrade.json.download"
@@ -34,7 +35,18 @@ void copy(char * src, char * dst){
 	fclose(out_fd);
 }
 
+void execmajor(void){
+
+}
+
 int main(){
+	if(atexit(execmajor)){
+		fprintf(stdout, "register at exit fail\n");
+	}
+	
+	//stage 1. read the conf file and get the remote conf file
+	//stage 2. commpare the two conf files
+	//stage 3. if is equal then exit if not equal excute the new conf
 	if(access(URLCONFPATH, F_OK) != -1){
 		remove(URLCONFPATH);
 	}
@@ -46,17 +58,17 @@ int main(){
 		struct conf * urlconf = loadconf(urljson);
 		cJSON_Delete(localjson);
 		cJSON_Delete(urljson);
-
-		if (0 != compareconf(localconf, urlconf) ){
+		struct list_head * head = getconf(localconf, urlconf); 
+		if(head && !list_empty(head)){
+			downloadprogram(head);
 			copy(URLCONFPATH, LOCALCONFPATH);
 			remove(URLCONFPATH); 
-			system("./upgrade");
-			exit(1);
-		}else{
-			fprintf(stdout, "i am in 2\n");
 		}
-
-	}else{
+		free(head);
+		runprograms(urlconf);
+		destroyconf(urlconf);
+	}else{ 
+		runprograms(localconf);
 	}
-	system("ls");
+	destroyconf(localconf);
 }
