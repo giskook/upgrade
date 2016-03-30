@@ -13,6 +13,7 @@
 
 int main()
 {
+	daemon(1,1);
 	setvbuf(stdout, NULL, _IONBF, 0); 
 	fflush(stdout); 
 
